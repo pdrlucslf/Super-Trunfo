@@ -1,33 +1,325 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Desafio Super Trunfo</title>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Desafio Cartas Super Trunfo</title>
+  <style>
+    :root{
+      --bg:#0f1226; --panel:#171a37; --panel-2:#1f2349; --text:#eef2ff; --muted:#a7b0d9;
+      --accent:#7c5cff; --win:#19c37d; --lose:#ff4d4f; --tie:#ffb020;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color:var(--text); background: radial-gradient(80rem 80rem at 20% -10%, #2a2f65 0, #141731 35%, #0b0d1e 70%), var(--bg);
+    }
+    header{
+      position:sticky; top:0; z-index:5; backdrop-filter:saturate(1.2) blur(8px);
+      background:linear-gradient(90deg, #141731cc, #0b0d1ecc);
+      border-bottom:1px solid #2b2f66; padding:16px 20px; display:flex; align-items:center; gap:14px;
+    }
+    header .logo{
+      width:36px; height:36px; border-radius:10px; background: conic-gradient(from 220deg, #7c5cff, #19c37d, #7c5cff);
+      display:grid; place-items:center; font-weight:800; color:#0b0d1e; letter-spacing:1px; box-shadow:0 0 0 3px #0b0d1e inset;
+    }
+    header h1{font-size:1.05rem; margin:0; color:#dfe5ff}
+    header small{color:var(--muted)}
+
+    main{padding:24px; max-width:1100px; margin:0 auto}
+
+    .hud{display:flex; gap:14px; flex-wrap:wrap; align-items:center; margin-bottom:18px}
+    .btn{appearance:none; border:1px solid #3b3f76; background:linear-gradient(180deg, #262a57, #1b1f45);
+      color:var(--text); padding:10px 14px; border-radius:12px; cursor:pointer; font-weight:600; transition:transform .06s ease, box-shadow .2s;
+      box-shadow:0 6px 18px #00000055, inset 0 1px 0 #ffffff18;
+    }
+    .btn[disabled]{opacity:.5; cursor:not-allowed}
+    .btn:hover:not([disabled]){transform:translateY(-1px)}
+
+    .hud .score{margin-left:auto; color:#cbd4ff; font-weight:700}
+
+    .board{display:grid; grid-template-columns:1fr 80px 1fr; gap:18px; align-items:stretch}
+    .vs{display:grid; place-items:center; color:#cbd4ff88; font-weight:900; letter-spacing:2px}
+
+    .card{
+      background:linear-gradient(180deg, var(--panel), var(--panel-2)); border:1px solid #2b2f66; border-radius:18px; padding:16px;
+      display:grid; grid-template-rows:auto 1fr auto; gap:12px; box-shadow:0 10px 30px #00000055, inset 0 1px 0 #ffffff10;
+      min-height:360px; position:relative; overflow:hidden;
+    }
+    .card::after{
+      content:""; position:absolute; inset:-20% -20% auto auto; width:180px; height:180px; transform:rotate(35deg);
+      background: radial-gradient(closest-side, #ffffff14, #ffffff00 70%);
+    }
+    .title{display:flex; align-items:center; gap:10px}
+    .badge{font-size:.75rem; color:#0b0d1e; background:#cbd4ff; border-radius:999px; padding:3px 8px; font-weight:800}
+    .who{font-size:.8rem; color:#aab3e3; margin-left:auto}
+    .imgBox{display:grid; place-items:center; height:140px; border:1px dashed #3b3f76; border-radius:14px;
+      background:linear-gradient(180deg, #1a1e44, #121536)
+    }
+    .img{font-size:54px}
+
+    .attrs{display:grid; gap:8px}
+    .attr{display:flex; align-items:center; gap:10px; background:#141736; border:1px solid #2b2f66; border-radius:12px; padding:10px}
+    .attr .name{flex:1; color:#cbd4ff}
+    .attr .value{font-weight:800}
+    .attr button{margin-left:auto}
+
+    .pick{display:flex; gap:8px; flex-wrap:wrap}
+
+    .tip{color:#a7b0d9; font-size:.9rem}
+
+    .msg{margin-top:18px; font-weight:700}
+    .msg.win{color:var(--win)}
+    .msg.lose{color:var(--lose)}
+    .msg.tie{color:var(--tie)}
+
+    .footer{margin-top:28px; color:#9aa4da; font-size:.9rem}
+
+    @media (max-width: 880px){
+      .board{grid-template-columns:1fr;}
+      .vs{height:10px}
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Super Trunfo</h1>
-        <div class="game-area">
-            <div class="player-section">
-                <h2>Sua Carta</h2>
-                <div id="player-card" class="card">
-                    </div>
-            </div>
-
-            <div class="actions">
-                <button id="play-button">Jogar</button>
-                <div id="result">Pressione "Jogar" para começar!</div>
-            </div>
-
-            <div class="player-section">
-                <h2>Carta do Oponente</h2>
-                <div id="opponent-card" class="card">
-                    </div>
-            </div>
-        </div>
+  <header>
+    <div class="logo">ST</div>
+    <div>
+      <h1>Super Trunfo — versão web (HTML, CSS e JS puro)</h1>
+      <small>Escolha um atributo da sua carta. Quem tiver o maior valor vence a rodada e pega as cartas.</small>
     </div>
-    <script src="script.js"></script>
+  </header>
+
+  <main>
+    <div class="hud">
+      <button id="btnNovoJogo" class="btn">🔄 Novo jogo</button>
+      <button id="btnProxima" class="btn" disabled>➡️ Próxima rodada</button>
+      <span class="score" id="placar">Você: 0 cartas • CPU: 0 cartas — Rodada 0</span>
+    </div>
+
+    <section class="board" aria-live="polite">
+      <!-- Carta do Jogador -->
+      <article class="card" id="cartaJog">
+        <div class="title">
+          <span class="badge">VOCÊ</span>
+          <span class="who" id="rodada"></span>
+        </div>
+        <div class="imgBox"><div class="img" id="emojiJog">🛡️</div></div>
+        <div class="attrs" id="attrsJog"></div>
+      </article>
+
+      <div class="vs">VS</div>
+
+      <!-- Carta da CPU -->
+      <article class="card" id="cartaCpu">
+        <div class="title">
+          <span class="badge">CPU</span>
+          <span class="who"></span>
+        </div>
+        <div class="imgBox"><div class="img" id="emojiCpu">❓</div></div>
+        <div class="attrs" id="attrsCpu"></div>
+      </article>
+    </section>
+
+    <p class="tip">Dica: você também pode apertar <strong>1</strong>, <strong>2</strong>, <strong>3</strong> ou <strong>4</strong> para escolher o atributo rapidamente.</p>
+    <p id="msg" class="msg"></p>
+
+    <div class="footer">
+      <p><strong>Como rodar:</strong> salve este arquivo como <code>index.html</code> e abra no navegador. Para publicar no GitHub Pages, suba este arquivo para um repositório e ative <em>Pages</em> nas configurações (branch <code>main</code>, pasta <code>/root</code>).</p>
+    </div>
+  </main>
+
+  <script>
+    // ====== Baralho padrão (12 cartas) ======
+    // Você pode trocar nomes/emojis/valores à vontade, mantendo 4 atributos: força, velocidade, inteligência, defesa.
+    const BARALHO_BASE = [
+      C("Lince", "🦊", 70, 92, 64, 58),
+      C("Touro", "🐂", 92, 58, 40, 86),
+      C("Falcão", "🦅", 48, 97, 72, 51),
+      C("Cérbero", "🐺", 86, 69, 55, 88),
+      C("Titã", "🗿", 98, 41, 47, 96),
+      C("Oráculo", "🧙‍♂️", 38, 51, 99, 44),
+      C("Ninfa", "🧚‍♀️", 42, 83, 88, 49),
+      C("Drácon", "🐉", 95, 82, 61, 79),
+      C("Quimera", "🐲", 91, 77, 57, 74),
+      C("Gárgula", "🪨", 73, 39, 52, 90),
+      C("Sereia", "🧜‍♀️", 44, 85, 81, 55),
+      C("Centauro", "🏹", 76, 88, 59, 63),
+    ];
+
+    function C(nome, emoji, forca, velocidade, inteligencia, defesa){
+      return { nome, emoji, attrs:{ forca, velocidade, inteligencia, defesa } };
+    }
+
+    const ATRIBUTOS = [
+      { key:"forca", label:"Força" },
+      { key:"velocidade", label:"Velocidade" },
+      { key:"inteligencia", label:"Inteligência" },
+      { key:"defesa", label:"Defesa" }
+    ];
+
+    // ====== Estado do jogo ======
+    let deckJog = []; // cartas do jogador
+    let deckCpu = []; // cartas da cpu
+    let monteEmpate = []; // acumula cartas quando dá empate
+
+    let cartaJog = null;
+    let cartaCpu = null;
+    let rodada = 0;
+
+    // ====== Util ======
+    const $ = sel => document.querySelector(sel);
+    function shuffle(arr){
+      // Fisher-Yates
+      const a = arr.slice();
+      for(let i=a.length-1;i>0;i--){
+        const j = Math.floor(Math.random()*(i+1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function atualizarPlacar(){
+      $("#placar").textContent = `Você: ${deckJog.length} cartas • CPU: ${deckCpu.length} cartas — Rodada ${rodada}`;
+    }
+
+    function bloquearEscolha(b){
+      document.querySelectorAll(".attr button").forEach(btn=> btn.disabled = b);
+    }
+
+    // ====== Renderização de cartas ======
+    function renderCartaJog(){
+      if(!cartaJog) return;
+      $("#emojiJog").textContent = cartaJog.emoji;
+      $("#attrsJog").innerHTML = ATRIBUTOS.map((a,idx)=>{
+        return `<div class="attr">
+          <span class="name">${a.label}</span>
+          <span class="value">${cartaJog.attrs[a.key]}</span>
+          <button class="btn pickBtn" data-attr="${a.key}" aria-keyshortcuts="${idx+1}">Escolher</button>
+        </div>`;
+      }).join("");
+      document.querySelectorAll(".pickBtn").forEach(btn=>{
+        btn.addEventListener("click",()=> escolherAtributo(btn.dataset.attr));
+      })
+    }
+
+    function renderCartaCpu(revelar=false, atributoEscolhido=null){
+      if(!cartaCpu) return;
+      $("#emojiCpu").textContent = revelar ? cartaCpu.emoji : "❓";
+      $("#attrsCpu").innerHTML = ATRIBUTOS.map(a=>{
+        const val = revelar ? cartaCpu.attrs[a.key] : "? ? ?";
+        const destaque = revelar && a.key===atributoEscolhido ? "style=\"outline:2px solid var(--accent); border-radius:10px;\"" : "";
+        return `<div class="attr" ${destaque}>
+          <span class="name">${a.label}</span>
+          <span class="value">${val}</span>
+        </div>`;
+      }).join("");
+    }
+
+    // ====== Fluxo do jogo ======
+    function novoJogo(){
+      const baralho = shuffle(BARALHO_BASE);
+      const metade = Math.ceil(baralho.length/2);
+      deckJog = baralho.slice(0, metade);
+      deckCpu = baralho.slice(metade);
+      monteEmpate = [];
+      rodada = 0;
+      $("#msg").textContent = "";
+      $("#btnProxima").disabled = true;
+      proximaRodada();
+    }
+
+    function proximaRodada(){
+      if(deckJog.length===0 || deckCpu.length===0){
+        fimDeJogo();
+        return;
+      }
+      rodada++;
+      $("#rodada").textContent = `Rodada ${rodada}`;
+      $("#msg").textContent = "Escolha um atributo da sua carta.";
+
+      cartaJog = deckJog.shift();
+      cartaCpu = deckCpu.shift();
+
+      renderCartaJog();
+      renderCartaCpu(false);
+      atualizarPlacar();
+      $("#btnProxima").disabled = true;
+      bloquearEscolha(false);
+    }
+
+    function escolherAtributo(attr){
+      bloquearEscolha(true);
+      renderCartaCpu(true, attr);
+
+      const vJog = cartaJog.attrs[attr];
+      const vCpu = cartaCpu.attrs[attr];
+
+      let vencedor = null; // "jog", "cpu" ou "empate"
+      if(vJog > vCpu) vencedor = "jog";
+      else if(vCpu > vJog) vencedor = "cpu";
+      else vencedor = "empate";
+
+      const pot = [cartaJog, cartaCpu, ...monteEmpate];
+      monteEmpate = [];
+
+      if(vencedor === "jog"){
+        deckJog.push(...pot);
+        mensagem(`Você venceu a rodada! (${vJog} vs ${vCpu})`, "win");
+      } else if(vencedor === "cpu"){
+        deckCpu.push(...pot);
+        mensagem(`CPU venceu a rodada. (${vJog} vs ${vCpu})`, "lose");
+      } else {
+        monteEmpate.push(cartaJog, cartaCpu);
+        mensagem(`Empate! (${vJog} vs ${vCpu}) — as cartas vão para o monte e valem mais na próxima.`, "tie");
+      }
+
+      atualizarPlacar();
+      $("#btnProxima").disabled = false;
+
+      if(deckJog.length===0 || deckCpu.length===0){
+        fimDeJogo();
+      }
+    }
+
+    function mensagem(txt, tipo){
+      const el = $("#msg");
+      el.textContent = txt;
+      el.className = `msg ${tipo||""}`;
+    }
+
+    function fimDeJogo(){
+      bloquearEscolha(true);
+      $("#btnProxima").disabled = true;
+      let txt = "";
+      if(deckJog.length===0 && deckCpu.length===0){
+        txt = "Deu empate geral!";
+      } else if(deckJog.length===0){
+        txt = "Fim de jogo: CPU venceu. Tente novamente!";
+      } else if(deckCpu.length===0){
+        txt = "Parabéns! Você venceu o jogo!";
+      } else {
+        txt = "Jogo encerrado.";
+      }
+      mensagem(txt);
+    }
+
+    // ====== Controles ======
+    $("#btnNovoJogo").addEventListener("click", novoJogo);
+    $("#btnProxima").addEventListener("click", proximaRodada);
+
+    // Atalhos de teclado 1..4
+    document.addEventListener("keydown", (e)=>{
+      if(["1","2","3","4"].includes(e.key)){
+        const idx = Number(e.key)-1;
+        const btn = document.querySelectorAll(".pickBtn")[idx];
+        if(btn && !btn.disabled) btn.click();
+      }
+    });
+
+    // Iniciar automaticamente
+    novoJogo();
+  </script>
 </body>
 </html>
